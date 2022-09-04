@@ -10,7 +10,7 @@ The *tree* of this repository is:
 ├── README.md
 ├── config.py
 ├── data
-│   └── fake_users.csv
+│   └── .gitkeep
 ├── model
 │   └── .gitkeep
 ├── notebooks
@@ -60,30 +60,47 @@ To run the code, we can use a *Docker container* since it can run in different O
 environments. For that, we have to build first the image using the Dockerfile:
 
 ```bash
-docker build . -t adevinta_docker_image
+docker build . -t fake_user_docker_image
 ```
 
 Then, we have to run a docker container based on the former docker image:
 
 ```bash
-docker run -d --name adevinta_test -v $(PWD):/adevinta -it adevinta_container
+docker run -d --name fake_user_container -v $(PWD):/fake_user -it fake_user_docker_image
 ```
 
 Finally, we can run the scripts to train a model and to get a inference for a given file:
 
 ```bash
 # To train a model and considering that the input file is in the container 
-docker exec -it adevinta_test python src/training.py --input-file data/fake_users.csv
+docker exec -it fake_user_container python src/training.py --input-file data/fake_users.csv
 
 # To infer for a given file
-docker exec -it adevinta_test python src/inference.py --input-file data/fake_users.csv --output-file data/output.csv
+docker exec -it fake_user_container python src/inference.py --input-file data/fake_users.csv --output-file data/output.csv
 ```
 
 You can recover the `output.csv` file in the data folder with the predictions.
 
 ----
 
-## Next steps
+## Results
 
-* Improve the feature engineering for the model
+The developed ML pipeline compares two models: a logistic regression and a random forest models.
+The pipeline compares both classifiers with different parameters using a GridSearch approach, and
+selects the best model based on the F1-score.
+
+To validate the model, we have split the data into train and test sets with a test size of 20%.
+Using only 2 features (number of total events per user and the number of unique categories per
+user), this data pipeline gives good results for the test set: `F1-score=0.98`.
+
+----
+
+## Next Steps
+
+The model can be improved using new features that can grasp better **Fake users** behavior.
+For example, we can build features that consider the interaction between the event type and
+the category type.
+
+Another idea could be to reduce the time window to observe the behavior of the user and try
+to use an RFM (Recency-Frequency-Monetary) behavior for each user.
 
